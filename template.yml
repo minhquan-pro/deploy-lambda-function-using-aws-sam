@@ -7,6 +7,7 @@ Resources:
   myDateTimeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      CodeUri: src/
       Handler: myDateTimeFunction.handler
       Runtime: nodejs18.x
 # Instructs your myDateTimeFunction is published to an alias named "live".      
@@ -31,6 +32,7 @@ Resources:
   beforeAllowTraffic:
     Type: AWS::Serverless::Function
     Properties:
+      CodeUri: src/
       Handler: beforeAllowTraffic.handler
       Policies:
         - Version: "2012-10-17"
@@ -62,6 +64,7 @@ Resources:
   afterAllowTraffic:
     Type: AWS::Serverless::Function
     Properties:
+      CodeUri: src/
       Handler: afterAllowTraffic.handler
       Policies:
         - Version: "2012-10-17"
