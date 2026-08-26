@@ -1,0 +1,89 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A sample SAM template for deploying Lambda functions.
+Resources:
+  myDateTimeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://aws-sam-artifacts-378371844902/3919134d6083d765d93921c08b038cf2
+      Handler: myDateTimeFunction.handler
+      Runtime: nodejs18.x
+      AutoPublishAlias: live
+      Policies:
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - lambda:InvokeFunction
+          Resource: '*'
+      DeploymentPreference:
+        Type: Linear10PercentEvery1Minute
+        Hooks:
+          PreTraffic:
+            Ref: beforeAllowTraffic
+          PostTraffic:
+            Ref: afterAllowTraffic
+    Metadata:
+      SamResourceId: myDateTimeFunction
+  beforeAllowTraffic:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://aws-sam-artifacts-378371844902/3919134d6083d765d93921c08b038cf2
+      Handler: beforeAllowTraffic.handler
+      Policies:
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - codedeploy:PutLifecycleEventHookExecutionStatus
+          Resource:
+            Fn::Sub: arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${ServerlessDeploymentApplication}/*
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - lambda:InvokeFunction
+          Resource:
+            Ref: myDateTimeFunction.Version
+      Runtime: nodejs18.x
+      FunctionName: CodeDeployHook_beforeAllowTraffic
+      DeploymentPreference:
+        Enabled: false
+      Timeout: 5
+      Environment:
+        Variables:
+          NewVersion:
+            Ref: myDateTimeFunction.Version
+    Metadata:
+      SamResourceId: beforeAllowTraffic
+  afterAllowTraffic:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://aws-sam-artifacts-378371844902/3919134d6083d765d93921c08b038cf2
+      Handler: afterAllowTraffic.handler
+      Policies:
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - codedeploy:PutLifecycleEventHookExecutionStatus
+          Resource:
+            Fn::Sub: arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${ServerlessDeploymentApplication}/*
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - lambda:InvokeFunction
+          Resource:
+            Ref: myDateTimeFunction.Version
+      Runtime: nodejs18.x
+      FunctionName: CodeDeployHook_afterAllowTraffic
+      DeploymentPreference:
+        Enabled: false
+      Timeout: 5
+      Environment:
+        Variables:
+          NewVersion:
+            Ref: myDateTimeFunction.Version
+    Metadata:
+      SamResourceId: afterAllowTraffic
